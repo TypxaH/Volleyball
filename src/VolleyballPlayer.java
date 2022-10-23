@@ -13,7 +13,7 @@ public class VolleyballPlayer implements Playable{
         this.condition = condition;
     }
 
-    //метод train(), който увеличава уменията му с 1 и намаля кондицията с 1.
+    //метод train(), който увеличава уменията му с 1 и намалява кондицията с 1.
     //Ако кондицията е 1 - не може да тренира.
     public void train(){
         if (this.condition != 1) {

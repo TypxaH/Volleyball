@@ -9,46 +9,34 @@ public class Main {
         String playersFile = "Players.csv", teamsFile = "Teams.csv";
         List<VolleyballTeam> volleyballTeams = readVolleyballTeams(teamsFile);
         List<VolleyballPlayer> volleyballPlayers = readVolleyballPlayers(playersFile);
-        VolleyballTeam team1, team2;
-        try {
+        VolleyballTeam team1,team2;
+        //Имаме 2 отбора с по 3-ма играчи
+        if (volleyballPlayers.size() >= 6 && volleyballTeams.size() >= 2) {
             //Добавяне на първите три играчиа към отбор 1
-            team1 = volleyballTeams.get(0);
-            for (int i = 0; i < 3; i++) {
-                team1.players.add(volleyballPlayers.get(i));
-            }
+            team1 = getVolleyballTeamPlayers(volleyballTeams, volleyballPlayers,1,3);
             //Добавяне на следващите три играча към отбор 2
-            team2 = volleyballTeams.get(1);
-            for (int i = 3; i < 6; i++) {
-                team2.players.add(volleyballPlayers.get(i));
-            }
-        } catch (Exception e) {
+            team2 = getVolleyballTeamPlayers(volleyballTeams, volleyballPlayers,2,3);
+        } else {
+            System.out.println("There are less then two teams or less then six players in the input files!");
             return;
         }
+        //Отпечатват се данните за отборите
         printTeams(volleyballTeams);
-        //Симулация със 10 мача между двата отбора
-        for (int i = 0; i < 10; i++) {
-            playMatch(team1, team2);
-        }
+        //Симулация с 10 мача между двата отбора
+        playMatches(team1, team2,10);
         //Три дена пауза
-        team1.teamRest();
-        team2.teamTraining();
-        team1.teamRest();
-        team2.teamTraining();
-        team1.teamTraining();
-        team2.teamRest();
-        //Симулация със 10 мача между двата отбора след пауза от три дни
+        restAndTrainThreeDays(team1, team2);
+        //Отпечатват се обновените данни за отборите
+        printTeams(volleyballTeams);
+        //Симулация с 10 мача между двата отбора след пауза от три дни
         System.out.println("-----------------NEW SEASON--------------------");
-        for (int i = 0; i < 10; i++) {
-            playMatch(team1, team2);
-        }
-        //Записване новото състояние на играчите (с обновени показатели за умения и
-        //кондиция)
+        playMatches(team1, team2,10);
+        //Записване новото състояние на играчите във файла (с обновени показатели за умения и кондиция)
         try {
             savePlayers(volleyballPlayers, playersFile);
         } catch (Exception e) {
             System.out.println("Can't write to file " + playersFile);
         }
-        printTeams(volleyballTeams);
     }
 
     public static ArrayList<VolleyballTeam> readVolleyballTeams(String fileName) {
@@ -64,8 +52,8 @@ public class Main {
             fileReader.close();
             return volleyballTeams;
         } catch (Exception e) {
-            System.out.println("Teams file not found!");
-            return null;
+            System.out.println("Teams file " + fileName + " not found!");
+            return new ArrayList<>();
         }
     }
 
@@ -82,17 +70,28 @@ public class Main {
             fileReader.close();
             return volleyballPlayers;
         } catch (Exception e) {
-            System.out.println("Players file not found!");
-            return null;
+            System.out.println("Players file " + fileName + " not found!");
+            return new ArrayList<>();
         }
     }
-
+    private static VolleyballTeam getVolleyballTeamPlayers(List<VolleyballTeam> volleyballTeams, List<VolleyballPlayer> volleyballPlayers, int teamNumber,int playersCount) {
+        VolleyballTeam team;
+        team = volleyballTeams.get(teamNumber-1);
+        for (int i = (teamNumber-1)*playersCount; i < teamNumber*playersCount; i++) {
+            team.players.add(volleyballPlayers.get(i));
+        }
+        return team;
+    }
     private static void printTeams(List<VolleyballTeam> volleyballTeams) {
         for (VolleyballTeam team : volleyballTeams) {
             System.out.println(team);
         }
     }
-
+    public static void playMatches(VolleyballTeam team1, VolleyballTeam team2, int n) {
+        for (int i = 0; i < n; i++) {
+            playMatch(team1, team2);
+        }
+    }
     //Направете метод playMatch(team1, team2),
     // който определя резултат от мач на база общите умения на отборите
     // и произволно число (от 1 до 25): team1.strength + random1
@@ -128,7 +127,14 @@ public class Main {
         fileWriter.printf(result);
         fileWriter.close();
     }
-
+    private static void restAndTrainThreeDays(VolleyballTeam team1, VolleyballTeam team2) {
+        team1.teamRest();
+        team2.teamTraining();
+        team1.teamRest();
+        team2.teamTraining();
+        team1.teamTraining();
+        team2.teamRest();
+    }
     private static void savePlayers(List<VolleyballPlayer> volleyballPlayers, String playersFile) throws FileNotFoundException {
         PrintStream fileWriter = new PrintStream(playersFile);
         for (VolleyballPlayer player : volleyballPlayers) {
